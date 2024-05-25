@@ -3,22 +3,38 @@ const Game = (function () {
     const board = Array(9).fill("")
     const boardDOM = document.querySelector("#game-board")
     const playerDOM = document.querySelector("#player")
+    const startButton = document.querySelector('#start')
+    let draw = false
     let gameEnd = false
     let currentPlayer = "x"
     
     
     const clickHandler = function (e) {
+        if (startButton.classList.contains('invisible')) buttonShow()
         addSymbol(e.target.id)
-        if (gameEnd) boardDOM.removeEventListener("click", clickHandler)
+    }
+
+    const buttonShow = function () {
+        startButton.classList.remove("invisible")
+    }
+
+    const buttonHide = function () {
+        startButton.classList.add('invisible')
     }
 
     const start = function() {
-        Game()
+        buttonHide()
+        board.fill("")
+        draw = false
+        gameEnd = false
         render()
     }
 
-    const render = function (string = `Player ${currentPlayer.toUpperCase()} turn`) {
-        board.forEach((el, index) => document.getElementById(index).innerText = el)
+    const render = function (string = `PLAYER ${currentPlayer.toUpperCase()} TURN`) {
+        board.forEach((el, index) => {
+            const cell = document.getElementById(index)
+            cell.innerHTML = `<div class="text-7xl">${el}</div>`
+        })
         playerDOM.innerText = string
     }
         
@@ -32,8 +48,14 @@ const Game = (function () {
             board[cell] = currentPlayer           
             if (checkWinner(cell)) {
                 gameEnd = true
-                render(`Player ${currentPlayer.toUpperCase()} wins`)
+                render(`PLAYER ${currentPlayer.toUpperCase()} WINS`)
+                
             }
+            
+            else if (draw) {
+                render("IT'A DRAW")
+            }
+
             else {
                 updatePlayerState()    
                 render()}
@@ -54,17 +76,18 @@ const Game = (function () {
         ];
         cell = Number(cell)
         let result = winConditions.filter((combinations) => combinations.includes(cell)).some((combination) => combination.every((cellIndex) => board[cellIndex] == currentPlayer))
+        if (board.every((cell) => cell != "")) draw = true
         return result
         
     }
 
     boardDOM.addEventListener("click", clickHandler)
-
+    startButton.addEventListener("click", start)
     render()
 
     return {addSymbol, start}
 
-})
+})()
 
-document.querySelector("#start").addEventListener("click", Game)
+
 
